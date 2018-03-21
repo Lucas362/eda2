@@ -11,6 +11,13 @@ typedef struct node{ /* Lista encadeada para colisões de hash */
   int key; /* índice do hash */
 }node;
 
+void startVetor(node *vetor[]){
+  int i;
+  for(i = 0; i < SIZE; i++){
+    vetor[i] = (node *) malloc (sizeof(node));
+  }
+}
+
 void insertEnd(node *lista, int valor){
 	node *novo = (node *) malloc(sizeof(node));
 	novo->value = valor;
@@ -50,8 +57,19 @@ void clearList(node *lista){
   lista->prox = NULL;
 }
 
-void createList(node *no){
-  int tam, range, i;
+int hash(int value){
+    return ((value % SIZE) + SIZE) % SIZE;
+}
+
+void insert(int num, node *vetor[]){
+  int hashPos;
+  node *novo, *p;
+  hashPos = hash(num); /* cálculo do hash */
+  insertEnd(vetor[hashPos], num);
+}
+
+void createList(node *no, node *vetor[]){
+  int tam, range, i, value;
   printf("Quantidade de itens da lista: ");
   scanf("%d", &tam);
 
@@ -61,49 +79,27 @@ void createList(node *no){
   srand((unsigned)time(NULL));
   for (i = 0; i < tam; i++){
       /* gerando valores aleatórios entre zero e o range */
-      insertEnd(no, (rand() % (range+1)));
+      value = (rand() % (range))+1;
+      insertEnd(no, value);
+      insert(value, vetor);
 
   }
+  showList(no);
   printf("===========\nLista gerada com sucesso!\n===========\n");
 }
 
-int hash(int *value){
-    return ((*value % SIZE) + SIZE) % SIZE;
-}
-
-void insert(int num, node vetor[]){
-  int hashPos;
-  node *novo, *p;
-  hashPos = hash(&num); /* cálculo do hash */
-  if(vetor[hashPos].key == NULL){
-    vetor[hashPos].key = hashPos;
-    vetor[hashPos].value = num;
-  }
-  else{ /* caso já exista valor na posição do hash, adicionar à lista */
-    novo = (node *) malloc (sizeof(node));
-    novo->key = hashPos;
-    novo->value = num;
-    p = &vetor[hashPos];
-    while(p->prox != NULL){
-      p = p->prox;
-    }
-    p->prox = novo;
-    novo->ant = p;
-    novo->prox = NULL;
-  }
-}
-
-int search(int num, node vetor[]){
+int search(int num, node *vetor[]){
   int key;
   node *temp;
 
-  key= hash(&num);
-  if(vetor[key].value == num){
+  key = hash(num);
+  if (vetor[key]->prox == NULL)
+    return -1;
+  if(vetor[key]->prox->value == num){
     return 1;
-  }
-  else{
-    temp = &vetor[key];
-    while(temp->prox != NULL){
+  }else{
+    temp = vetor[key]->prox;
+    while(temp != NULL){
       if(temp->value == num){
         return 1;
       }
@@ -113,33 +109,17 @@ int search(int num, node vetor[]){
   return -1;
 }
 
-void menu(){
-  puts("Escolha uma opcao abaixo");
-  puts("1 - Gerar nova lista");
-  puts("2 - Listar valores");
-  puts("3 - Buscar valor");
-  puts("0 - Sair");
-}
-
 int main(void){
-  node vetor[SIZE], *lista;
+  node *vetor[SIZE], *lista;
   lista = (node *) malloc(sizeof(node));
-  int op;
-  createList(lista);
+  int busca;
+  startVetor(vetor);
+  createList(lista, vetor);
   do{
-    menu();
-    scanf("%d", &op);
-    switch (op) {
-      case 1:
-        clearList(lista);
-        createList(lista);
-        break;
-      case 2:
-        showList(lista);
-        break;
-      // case 3:
-      //   search();
-    }
-  }while(op != 0);
+    printf("Buscar valor (0 ou menos para sair): ");
+    scanf("%d", &busca);
+    if(busca > 0)
+      search(busca, vetor)==1 ? puts("Encontrado") : puts("Nao Encontrado");
+  }while(busca > 0);
   return 0;
 }
