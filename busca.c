@@ -78,37 +78,43 @@ void createList(node *no, node *vetor[]){
   srand((unsigned)time(NULL));
   for (i = 0; i < tam; i++){
       /* gerando valores aleatórios entre zero e o range */
-      value = (rand() % (range))+1;
+      value = (rand() % (range+1));
       insertEnd(no, value);
       insert(value, vetor);
   }
   printf("===========\nLista gerada com sucesso!\n===========\n");
 }
 
-int search(int num, node *vetor[]){
+double search(int num, node *vetor[]){
+  clock_t t = clock();
   int key;
   node *temp;
 
   key = hash(num);
   temp = vetor[key]->prox;
-  while(temp != NULL){
+  while(temp != NULL && num >= 0){
     if(temp->value == num){
-      return 1;
+      puts("\n=====Encontrado=====");
+      return (double)(clock()-t)/CLOCKS_PER_SEC; // in seconds
     }
     temp = temp->prox;
   }
-  return -1;
+  puts("\n=====Nao Encontrado=====");
+  return (double)(clock()-t)/CLOCKS_PER_SEC; // in seconds
 }
 
-int sequentialSearch(int num, node *lista){
+double sequentialSearch(int num, node *lista){
+  clock_t t = clock();
   node *temp = lista->prox;
-  while(temp != NULL){
+  while(temp != NULL && num >= 0){
     if(temp->value == num){
-      return 1;
+      puts("\n=====Encontrado=====");
+      return (double)(clock()-t)/CLOCKS_PER_SEC; // in seconds
     }
     temp = temp->prox;
   }
-  return -1;
+  puts("\n=====Nao Encontrado=====");
+  return (double)(clock()-t)/CLOCKS_PER_SEC; // in seconds
 }
 
 void menu(){
@@ -123,7 +129,6 @@ int main(void){
   lista = (node *) malloc(sizeof(node));
   int busca, op;
   double time_taken;
-  clock_t t, t2;
   startVetor(vetor);
   createList(lista, vetor);
   do{
@@ -134,33 +139,21 @@ int main(void){
         showList(lista);
         break;
       case 2:
-        printf("Buscar valor (0 ou menos para cancelar): ");
+        printf("Buscar valor: ");
         scanf("%d", &busca);
-
-          t = clock();
-          search(busca, vetor)==1 ? puts("\n=====Encontrado=====")
-           : puts("\n=====Nao Encontrado=====");
-           t2 = clock();
-           time_taken = (double)(t2-t)/CLOCKS_PER_SEC; // in seconds
-           printf("A funcao gastou %f segundos\n\n", time_taken);
+        time_taken = search(busca, vetor);
+        printf("A funcao gastou %f segundos\n\n", time_taken);
 
         break;
       case 3:
         printf("Buscar valor: ");
         scanf("%d", &busca);
-        t = clock();
-        search(busca, vetor)==1 ? puts("\n=====Encontrado=====")
-         : puts("\n=====Nao Encontrado=====");
-        t2 = clock();
-        time_taken = (double)(t2-t)/CLOCKS_PER_SEC; // in seconds
-        printf("A funcao hash gastou %f segundos\n\n", time_taken);
 
-        t = clock();
-        sequentialSearch(busca, lista)==1 ? puts("\n=====Encontrado=====")
-         : puts("\n=====Nao Encontrado=====");
-        t2 = clock();
-        time_taken = ((double)(t2-t))/CLOCKS_PER_SEC; // in seconds
-        printf("A busca sequencial gastou %lf segundos\n\n", time_taken);
+        time_taken = search(busca, vetor);
+        printf("A funcao gastou %f segundos\n\n", time_taken);
+
+        time_taken = sequentialSearch(busca, lista);
+        printf("A funcao gastou %f segundos\n\n", time_taken);
     }
   }while(op > 0);
   return 0;
